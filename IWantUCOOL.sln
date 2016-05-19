@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CB.Net.SignalR", "..\..\..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWantUInfrastructure", "IWantUInfrastructure\IWantUInfrastructure.csproj", "{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWantUWindowServer", "IWantUWindowServer\IWantUWindowServer.csproj", "{28141371-222E-4EB8-8312-55392FBBCA8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28141371-222E-4EB8-8312-55392FBBCA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28141371-222E-4EB8-8312-55392FBBCA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28141371-222E-4EB8-8312-55392FBBCA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28141371-222E-4EB8-8312-55392FBBCA8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

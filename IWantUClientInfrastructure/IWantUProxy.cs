@@ -42,10 +42,12 @@ namespace IWantUClientInfrastructure
         protected override void InitializeProxy()
         {
             base.InitializeProxy();
-            _hubConnection.Items["Name"] = Name;
+            _hubProxy["Name"] = Name;
             _hubProxy.On("receiveUsers",
                 (IEnumerable<KeyValuePair<string, string>> users) =>
-                OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value }).ToArray()));
+                {
+                    OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value }).ToArray());
+                });
             _hubProxy.On("receiveMessage", (string message, string senderId) => OnMessagedReceived(message, senderId));
         }
         #endregion

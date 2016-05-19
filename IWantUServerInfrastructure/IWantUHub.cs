@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using CB.Model.Common;
 using CB.Net.SignalR.Server;
 
 
@@ -12,6 +13,13 @@ namespace IWantUServerInfrastructure
         #region Fields
         private static readonly ConcurrentDictionary<string, string> _idNameDictionary =
             new ConcurrentDictionary<string, string>();
+        #endregion
+
+
+        #region  Constructors & Destructor
+        public IWantUHub() { }
+
+        public IWantUHub(ILog logger): base(logger) { }
         #endregion
 
 

@@ -24,7 +24,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBox Grid.Row="0" Grid.Column="0"
-                 Text="{Binding Name}" />
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
 
         <Button Grid.Row="0" Grid.Column="1" Content="Sign In"
                 Command="{Binding SignInCommand}" />
@@ -41,12 +41,12 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Column="0" DisplayMemberPath="Name"
+            <ListBox Grid.Column="0" DisplayMemberPath="Name" Width="160"
                      ItemsSource="{Binding Friends}"
                      SelectedItem="{Binding SelectedFriend}" />
 
             <TextBox Grid.Column="1"
-                     Text="{Binding SelectedMessage}" />
+                     Text="{Binding SelectedMessage, Mode=OneWay}" />
         </Grid>
     </Grid>
 </Window>
