@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{71161393-EF5C-4383-AFFD-6F2ACC84D888}</ProjectGuid>
+    <ProjectGuid>{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IWantUClientInfrastructure</RootNamespace>
-    <AssemblyName>IWantUClientInfrastructure</AssemblyName>
+    <RootNamespace>IWantUInfrastructure</RootNamespace>
+    <AssemblyName>IWantUInfrastructure</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,14 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,29 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IWantUProxy.cs" />
+    <Compile Include="Account.cs" />
+    <Compile Include="AccountsReceivedEventArgs.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="MessageReceivedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Configuration\CB.Configuration.Common\CB.Configuration.Common.csproj">
-      <Project>{9f2166ae-f09b-49c1-9b6d-2ee861593a73}</Project>
-      <Name>CB.Configuration.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR.Client\CB.Net.SignalR.Client.csproj">
-      <Project>{347FD783-6E7B-415E-BD4F-AED6B82A4879}</Project>
-      <Name>CB.Net.SignalR.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR\CB.Net.SignalR.csproj">
-      <Project>{7277C78D-A76E-4117-A4BE-3F4C6068B04F}</Project>
-      <Name>CB.Net.SignalR</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IWantUInfrastructure\IWantUInfrastructure.csproj">
-      <Project>{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}</Project>
-      <Name>IWantUInfrastructure</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
