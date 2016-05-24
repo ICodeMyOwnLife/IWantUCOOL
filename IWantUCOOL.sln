@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWantUWebServer", "IWantUWebServer\IWantUWebServer.csproj", "{D9258E73-0428-4180-9C1C-1F554CEDDA0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CB.Net.SignalR.Server", "..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR.Server\CB.Net.SignalR.Server.csproj", "{0F09C479-B61B-4BD7-8335-14A239C7A811}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CB.Net.SignalR.Client", "..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR.Client\CB.Net.SignalR.Client.csproj", "{347FD783-6E7B-415E-BD4F-AED6B82A4879}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWantUServerInfrastructure", "IWantUServerInfrastructure\IWantUServerInfrastructure.csproj", "{20EA70C7-8799-4B54-94EC-068CA1C7BBA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWantUClientInfrastructure", "IWantUClientInfrastructure\IWantUClientInfrastructure.csproj", "{71161393-EF5C-4383-AFFD-6F2ACC84D888}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9258E73-0428-4180-9C1C-1F554CEDDA0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9258E73-0428-4180-9C1C-1F554CEDDA0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9258E73-0428-4180-9C1C-1F554CEDDA0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9258E73-0428-4180-9C1C-1F554CEDDA0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F09C479-B61B-4BD7-8335-14A239C7A811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F09C479-B61B-4BD7-8335-14A239C7A811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F09C479-B61B-4BD7-8335-14A239C7A811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F09C479-B61B-4BD7-8335-14A239C7A811}.Release|Any CPU.Build.0 = Release|Any CPU
+		{347FD783-6E7B-415E-BD4F-AED6B82A4879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{347FD783-6E7B-415E-BD4F-AED6B82A4879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{347FD783-6E7B-415E-BD4F-AED6B82A4879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{347FD783-6E7B-415E-BD4F-AED6B82A4879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20EA70C7-8799-4B54-94EC-068CA1C7BBA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20EA70C7-8799-4B54-94EC-068CA1C7BBA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20EA70C7-8799-4B54-94EC-068CA1C7BBA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20EA70C7-8799-4B54-94EC-068CA1C7BBA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71161393-EF5C-4383-AFFD-6F2ACC84D888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71161393-EF5C-4383-AFFD-6F2ACC84D888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71161393-EF5C-4383-AFFD-6F2ACC84D888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71161393-EF5C-4383-AFFD-6F2ACC84D888}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
