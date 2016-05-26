@@ -18,23 +18,27 @@ namespace IWantUClientInfrastructure
         #endregion
 
 
-        #region  Properties & Indexers
-        public string Name { get; set; } = "User";
-        #endregion
-
-
         #region Events
+        public event EventHandler<AccountRemovedEventArgs> AccountRemoved;
         public event EventHandler<AccountsReceivedEventArgs> AccountsReceived;
         public event EventHandler<MessageReceivedEventArgs> MessagedReceived;
+
+        public event EventHandler<AccountReceivedEventArgs> NewAccountReceived;
         #endregion
 
 
         #region Methods
         public virtual async Task GetUsersAsync()
-            => await _hubProxy.Invoke("GetUsers");
+            => await _hubProxy.Invoke("GetAccounts");
 
         public virtual async Task SendMessageAsync(string message, string receiverId)
             => await _hubProxy.Invoke("SendMessage", message, receiverId);
+
+        public virtual async Task SignInAsync(string name)
+        {
+            _hubProxy["Name"] = name;
+            await _hubProxy.Invoke("SignIn");
+        }
         #endregion
 
 
@@ -42,37 +46,43 @@ namespace IWantUClientInfrastructure
         protected override void InitializeProxy()
         {
             base.InitializeProxy();
-            _hubProxy["Name"] = Name;
-            _hubProxy.On("receiveUsers",
+            _hubProxy.On("receiveAccounts",
                 (IEnumerable<KeyValuePair<string, string>> users) =>
                 {
-                    OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value }).ToArray());
+                    OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value }));
                 });
+            _hubProxy.On("receiveNewAccount",
+                (string id, string name) => OnNewAccountReceived(new Account { Id = id, Name = name }));
             _hubProxy.On("receiveMessage", (string message, string senderId) => OnMessagedReceived(message, senderId));
+            _hubProxy.On("removeAccount", (string id) => OnAccountRemoved(id));
         }
         #endregion
 
 
         #region Implementation
-        protected virtual void OnAccountsReceived(Account[] accounts)
-        {
-            OnAccountsReceived(new AccountsReceivedEventArgs { Accounts = accounts });
-        }
+        private void OnAccountRemoved(string id)
+            => OnAccountRemoved(new AccountRemovedEventArgs { Id = id });
+
+        protected virtual void OnAccountRemoved(AccountRemovedEventArgs e)
+            => AccountRemoved?.Invoke(this, e);
+
+        protected virtual void OnAccountsReceived(IEnumerable<Account> accounts)
+            => OnAccountsReceived(new AccountsReceivedEventArgs { Accounts = accounts });
 
         protected virtual void OnAccountsReceived(AccountsReceivedEventArgs e)
-        {
-            AccountsReceived?.Invoke(this, e);
-        }
+            => AccountsReceived?.Invoke(this, e);
 
         protected virtual void OnMessagedReceived(string message, string senderId)
-        {
-            OnMessagedReceived(new MessageReceivedEventArgs { Message = message, SenderId = senderId });
-        }
+            => OnMessagedReceived(new MessageReceivedEventArgs { Message = message, SenderId = senderId });
 
         protected virtual void OnMessagedReceived(MessageReceivedEventArgs e)
-        {
-            MessagedReceived?.Invoke(this, e);
-        }
+            => MessagedReceived?.Invoke(this, e);
+
+        private void OnNewAccountReceived(Account account)
+            => OnNewAccountReceived(new AccountReceivedEventArgs { Account = account });
+
+        protected virtual void OnNewAccountReceived(AccountReceivedEventArgs e)
+            => NewAccountReceived?.Invoke(this, e);
         #endregion
     }
 }

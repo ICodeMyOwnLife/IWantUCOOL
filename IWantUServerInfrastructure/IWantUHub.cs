@@ -24,7 +24,7 @@ namespace IWantUServerInfrastructure
 
 
         #region Methods
-        public void GetUsers()
+        public void GetAccounts()
         {
             SendUsersTo(Context.ConnectionId);
         }
@@ -33,21 +33,26 @@ namespace IWantUServerInfrastructure
         {
             Clients.Client(receiverId).receiveMessage(message, Context.ConnectionId);
         }
+
+        public void SignIn()
+        {
+            var id = Context.ConnectionId;
+            var name = Clients.Caller.Name;
+            _idNameDictionary[id] = name;
+            SendUsersTo(Context.ConnectionId);
+
+            Clients.Others.addNewAccount(id, name);
+        }
         #endregion
 
 
         #region Override
-        public override Task OnConnected()
-        {
-            _idNameDictionary[Context.ConnectionId] = Clients.Caller.Name;
-            SendUsersTo(Context.ConnectionId);
-            return base.OnConnected();
-        }
-
         public override Task OnDisconnected(bool stopCalled)
         {
             string name;
-            _idNameDictionary.TryRemove(Context.ConnectionId, out name);
+            var id = Context.ConnectionId;
+            _idNameDictionary.TryRemove(id, out name);
+            Clients.Others.removeAccount(id);
             return base.OnDisconnected(stopCalled);
         }
         #endregion
@@ -56,7 +61,7 @@ namespace IWantUServerInfrastructure
         #region Implementation
         private void SendUsersTo(string connectionId)
         {
-            Clients.Client(connectionId).receiveUsers(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
+            Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
         }
         #endregion
     }

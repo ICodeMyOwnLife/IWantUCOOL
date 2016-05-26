@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 
 namespace IWantUInfrastructure
@@ -6,7 +7,9 @@ namespace IWantUInfrastructure
     public class AccountsReceivedEventArgs: EventArgs
     {
         #region  Properties & Indexers
-        public Account[] Accounts { get; set; }
+        public IEnumerable<Account> Accounts { get; set; }
         #endregion
     }
 }
+
+

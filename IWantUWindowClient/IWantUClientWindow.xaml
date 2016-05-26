@@ -4,12 +4,25 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IWantUWindowClient"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:prm="http://prismlibrary.com/"
         mc:Ignorable="d"
         Title="I Want U Client" Height="350" Width="525">
 
     <Window.DataContext>
         <local:IWanUClientViewModel />
     </Window.DataContext>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <prm:InvokeCommandAction Command="{Binding ConnectAsyncCommand}" />
+        </i:EventTrigger>
+
+        <prm:InteractionRequestTrigger
+            SourceObject="{Binding NotificationRequestProvider.NotificationRequest}">
+            <prm:PopupWindowAction CenterOverAssociatedObject="True" IsModal="True" />
+        </prm:InteractionRequestTrigger>
+    </i:Interaction.Triggers>
 
     <Grid>
         <Grid.RowDefinitions>

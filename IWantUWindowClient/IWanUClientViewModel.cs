@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -15,12 +16,11 @@ namespace IWantUWindowClient
     public class IWanUClientViewModel: SignalRClientViewModelBase<IWantUProxy>
     {
         #region Fields
-        private Account[] _friends = new Account[0];
+        private ObservableCollection<Account> _friends = new ObservableCollection<Account>();
         private string _message;
         private readonly IList<Message> _messages = new List<Message>();
         private string _name;
         private Account _selectedFriend;
-
         private Message _selectedMessage;
         #endregion
 
@@ -29,7 +29,9 @@ namespace IWantUWindowClient
         public IWanUClientViewModel(): base(new IWantUProxy())
         {
             _proxy.AccountsReceived += Proxy_AccountsReceived;
+            _proxy.AccountRemoved += Proxy_AccountRemoved;
             _proxy.MessagedReceived += Proxy_MessagedReceived;
+            _proxy.NewAccountReceived += Proxy_NewAccountReceived;
             SendMessageCommand = DelegateCommand.FromAsyncHandler(SendMessageAsync);
             SignInCommand = DelegateCommand.FromAsyncHandler(SignInAsync);
         }
@@ -37,10 +39,14 @@ namespace IWantUWindowClient
 
 
         #region  Properties & Indexers
-        public Account[] Friends
+        public IEnumerable<Account> Friends
         {
             get { return _friends; }
-            private set { SetProperty(ref _friends, value); }
+            private set
+            {
+                SetProperty(ref _friends,
+                    value as ObservableCollection<Account> ?? new ObservableCollection<Account>(value));
+            }
         }
 
         public string Message
@@ -52,13 +58,7 @@ namespace IWantUWindowClient
         public string Name
         {
             get { return _name; }
-            set
-            {
-                if (SetProperty(ref _name, value))
-                {
-                    _proxy.Name = value;
-                }
-            }
+            set { SetProperty(ref _name, value); }
         }
 
         public Account SelectedFriend
@@ -90,26 +90,30 @@ namespace IWantUWindowClient
             => await _proxy.SendMessageAsync(Message, SelectedFriend.Id);
 
         public async Task SignInAsync()
-            => await _proxy.ConnectAsync();
+            => await _proxy.SignInAsync(Name);
         #endregion
 
 
         #region Event Handlers
+        private void Proxy_AccountRemoved(object sender, AccountRemovedEventArgs e)
+            => _friends.Remove(_friends.FirstOrDefault(a => a.Id == e.Id));
+
         private void Proxy_AccountsReceived(object sender, AccountsReceivedEventArgs e)
-        {
-            Friends = e.Accounts;
-        }
+            => Friends = new ObservableCollection<Account>(e.Accounts);
 
         private void Proxy_MessagedReceived(object sender, MessageReceivedEventArgs e)
         {
             SelectedFriend = Friends.FirstOrDefault(f => f.Id == e.SenderId);
             AddMessageContent(SelectedMessage, e.Message);
         }
+
+        private void Proxy_NewAccountReceived(object sender, AccountReceivedEventArgs e)
+            => _friends.Add(e.Account);
         #endregion
 
 
         #region Implementation
-        private void AddMessageContent(Message message, string content)
+        private static void AddMessageContent(Message message, string content)
         {
             var text = $"{message.Friend.Name}: {content}";
             message.Content = message.Content == null ? text : message.Content + Environment.NewLine + text;
