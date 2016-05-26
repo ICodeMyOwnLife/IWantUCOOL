@@ -44,9 +44,16 @@
     <Compile Include="AccountReceivedEventArgs.cs" />
     <Compile Include="AccountRemovedEventArgs.cs" />
     <Compile Include="AccountsReceivedEventArgs.cs" />
+    <Compile Include="ChosenAnnouncedEventArgs.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageReceivedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Model\CB.Model.Common\CB.Model.Common.csproj">
+      <Project>{33A5DF99-1312-4023-A6EF-EABB9848F5A6}</Project>
+      <Name>CB.Model.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

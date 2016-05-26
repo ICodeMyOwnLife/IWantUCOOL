@@ -11,6 +11,9 @@ namespace IWantUServerInfrastructure
     public class IWantUHub: SignalRHubBase
     {
         #region Fields
+        private static readonly ConcurrentDictionary<string, string> _coupleChoices =
+            new ConcurrentDictionary<string, string>();
+
         private static readonly ConcurrentDictionary<string, string> _idNameDictionary =
             new ConcurrentDictionary<string, string>();
         #endregion
@@ -24,15 +27,30 @@ namespace IWantUServerInfrastructure
 
 
         #region Methods
-        public void GetAccounts()
+        public void ChooseAccount(string receiverId)
         {
-            SendUsersTo(Context.ConnectionId);
+            var senderId = Context.ConnectionId;
+            _coupleChoices[senderId] = receiverId;
+
+            string receiverChoice;
+            if (!_coupleChoices.TryGetValue(receiverId, out receiverChoice)) return;
+
+            if (receiverChoice == senderId)
+            {
+                Clients.Caller.announceChosen(receiverId, true);
+                Clients.Client(receiverId).announceChosen(senderId, true);
+            }
+            else
+            {
+                Clients.Caller.announceChosen(receiverId, false);
+            }
         }
 
+        public void GetAccounts()
+            => SendUsersTo(Context.ConnectionId);
+
         public void SendMessage(string message, string receiverId)
-        {
-            Clients.Client(receiverId).receiveMessage(message, Context.ConnectionId);
-        }
+            => Clients.Client(receiverId).receiveMessage(message, Context.ConnectionId);
 
         public void SignIn()
         {
@@ -41,7 +59,7 @@ namespace IWantUServerInfrastructure
             _idNameDictionary[id] = name;
             SendUsersTo(Context.ConnectionId);
 
-            Clients.Others.addNewAccount(id, name);
+            Clients.Others.receiveNewAccount(id, name);
         }
         #endregion
 
@@ -60,9 +78,7 @@ namespace IWantUServerInfrastructure
 
         #region Implementation
         private void SendUsersTo(string connectionId)
-        {
-            Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
-        }
+            => Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
         #endregion
     }
 }

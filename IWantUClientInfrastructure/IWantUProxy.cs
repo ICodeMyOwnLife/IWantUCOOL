@@ -21,13 +21,16 @@ namespace IWantUClientInfrastructure
         #region Events
         public event EventHandler<AccountRemovedEventArgs> AccountRemoved;
         public event EventHandler<AccountsReceivedEventArgs> AccountsReceived;
+        public event EventHandler<ChosenAnnouncedEventArgs> ChosenAnnounced;
         public event EventHandler<MessageReceivedEventArgs> MessagedReceived;
-
         public event EventHandler<AccountReceivedEventArgs> NewAccountReceived;
         #endregion
 
 
         #region Methods
+        public virtual async Task ChooseUser(string id)
+            => await _hubProxy.Invoke("ChooseAccount", id);
+
         public virtual async Task GetUsersAsync()
             => await _hubProxy.Invoke("GetAccounts");
 
@@ -46,11 +49,11 @@ namespace IWantUClientInfrastructure
         protected override void InitializeProxy()
         {
             base.InitializeProxy();
+            _hubProxy.On("announceChosen", (string id, bool isChosen) =>
+                                           OnChosenAnnounced(id, isChosen));
             _hubProxy.On("receiveAccounts",
                 (IEnumerable<KeyValuePair<string, string>> users) =>
-                {
-                    OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value }));
-                });
+                OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value })));
             _hubProxy.On("receiveNewAccount",
                 (string id, string name) => OnNewAccountReceived(new Account { Id = id, Name = name }));
             _hubProxy.On("receiveMessage", (string message, string senderId) => OnMessagedReceived(message, senderId));
@@ -71,6 +74,12 @@ namespace IWantUClientInfrastructure
 
         protected virtual void OnAccountsReceived(AccountsReceivedEventArgs e)
             => AccountsReceived?.Invoke(this, e);
+
+        private void OnChosenAnnounced(string id, bool isChosen)
+            => OnChosenAnnounced(new ChosenAnnouncedEventArgs { Id = id, IsChosen = isChosen });
+
+        protected virtual void OnChosenAnnounced(ChosenAnnouncedEventArgs e)
+            => ChosenAnnounced?.Invoke(this, e);
 
         protected virtual void OnMessagedReceived(string message, string senderId)
             => OnMessagedReceived(new MessageReceivedEventArgs { Message = message, SenderId = senderId });

@@ -30,6 +30,9 @@ namespace IWantUWindowServer
         #region Override
         public override void Log(string logContent)
             => LogMessage = LogMessage == null ? logContent : LogMessage + Environment.NewLine + logContent;
+
+        public override void LogError(Exception exception)
+            => Log(exception.Message);
         #endregion
     }
 }
