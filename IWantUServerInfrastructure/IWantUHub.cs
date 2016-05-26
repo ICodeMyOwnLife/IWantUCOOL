@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CB.Model.Common;
 using CB.Net.SignalR.Server;
+using IWantUInfrastructure;
 
 
 namespace IWantUServerInfrastructure
@@ -30,20 +31,29 @@ namespace IWantUServerInfrastructure
         public void ChooseAccount(string receiverId)
         {
             var senderId = Context.ConnectionId;
+
+            if (_coupleChoices.ContainsKey(senderId))
+            {
+                Clients.Caller.announceChosen(receiverId, ChoiceResult.Done);
+                return;
+            }
+
             _coupleChoices[senderId] = receiverId;
+            _logger.Log($"{GetName(senderId)} chose {GetName(receiverId)}.");
+
+            foreach (var userChooseMe in _coupleChoices.Where(p => p.Value == senderId))
+            {
+                Clients.Client(userChooseMe.Key).announceChosen(senderId,
+                    userChooseMe.Key == receiverId ? ChoiceResult.Successful : ChoiceResult.Failed);
+            }
 
             string receiverChoice;
-            if (!_coupleChoices.TryGetValue(receiverId, out receiverChoice)) return;
-
-            if (receiverChoice == senderId)
-            {
-                Clients.Caller.announceChosen(receiverId, true);
-                Clients.Client(receiverId).announceChosen(senderId, true);
-            }
-            else
-            {
-                Clients.Caller.announceChosen(receiverId, false);
-            }
+            var result = !_coupleChoices.TryGetValue(receiverId, out receiverChoice)
+                             ? ChoiceResult.Undone
+                             : receiverChoice == senderId
+                                   ? ChoiceResult.Successful
+                                   : ChoiceResult.Failed;
+            Clients.Caller.announceChosen(receiverId, result);
         }
 
         public void GetAccounts()
@@ -52,14 +62,14 @@ namespace IWantUServerInfrastructure
         public void SendMessage(string message, string receiverId)
             => Clients.Client(receiverId).receiveMessage(message, Context.ConnectionId);
 
-        public void SignIn()
+        public void SignIn(string name)
         {
             var id = Context.ConnectionId;
-            var name = Clients.Caller.Name;
+            Clients.Clients(_idNameDictionary.Keys.ToList()).receiveNewAccount(id, name);
             _idNameDictionary[id] = name;
             SendUsersTo(Context.ConnectionId);
 
-            Clients.Others.receiveNewAccount(id, name);
+            _logger.Log($"{id} is signed in as {name}");
         }
         #endregion
 
@@ -77,6 +87,12 @@ namespace IWantUServerInfrastructure
 
 
         #region Implementation
+        private static string GetName(string accountId)
+        {
+            string name;
+            return _idNameDictionary.TryGetValue(accountId, out name) ? name : null;
+        }
+
         private void SendUsersTo(string connectionId)
             => Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
         #endregion

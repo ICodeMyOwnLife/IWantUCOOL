@@ -29,19 +29,16 @@ namespace IWantUClientInfrastructure
 
         #region Methods
         public virtual async Task ChooseUser(string id)
-            => await _hubProxy.Invoke("ChooseAccount", id);
+            => await TryAsync(async () => await _hubProxy.Invoke("ChooseAccount", id));
 
         public virtual async Task GetUsersAsync()
-            => await _hubProxy.Invoke("GetAccounts");
+            => await TryAsync(async () => await _hubProxy.Invoke("GetAccounts"));
 
         public virtual async Task SendMessageAsync(string message, string receiverId)
-            => await _hubProxy.Invoke("SendMessage", message, receiverId);
+            => await TryAsync(async () => await _hubProxy.Invoke("SendMessage", message, receiverId));
 
         public virtual async Task SignInAsync(string name)
-        {
-            _hubProxy["Name"] = name;
-            await _hubProxy.Invoke("SignIn");
-        }
+            => await TryAsync(async () => await _hubProxy.Invoke("SignIn", name));
         #endregion
 
 
@@ -49,8 +46,8 @@ namespace IWantUClientInfrastructure
         protected override void InitializeProxy()
         {
             base.InitializeProxy();
-            _hubProxy.On("announceChosen", (string id, bool isChosen) =>
-                                           OnChosenAnnounced(id, isChosen));
+            _hubProxy.On("announceChosen", (string id, ChoiceResult result) =>
+                                           OnChosenAnnounced(id, result));
             _hubProxy.On("receiveAccounts",
                 (IEnumerable<KeyValuePair<string, string>> users) =>
                 OnAccountsReceived(users.Select(p => new Account { Id = p.Key, Name = p.Value })));
@@ -72,11 +69,10 @@ namespace IWantUClientInfrastructure
         protected virtual void OnAccountsReceived(IEnumerable<Account> accounts)
             => OnAccountsReceived(new AccountsReceivedEventArgs { Accounts = accounts });
 
-        protected virtual void OnAccountsReceived(AccountsReceivedEventArgs e)
-            => AccountsReceived?.Invoke(this, e);
+        protected virtual void OnAccountsReceived(AccountsReceivedEventArgs e) => AccountsReceived?.Invoke(this, e);
 
-        private void OnChosenAnnounced(string id, bool isChosen)
-            => OnChosenAnnounced(new ChosenAnnouncedEventArgs { Id = id, IsChosen = isChosen });
+        private void OnChosenAnnounced(string id, ChoiceResult choiceResult)
+            => OnChosenAnnounced(new ChosenAnnouncedEventArgs { Id = id, ChoiceResult = choiceResult });
 
         protected virtual void OnChosenAnnounced(ChosenAnnouncedEventArgs e)
             => ChosenAnnounced?.Invoke(this, e);

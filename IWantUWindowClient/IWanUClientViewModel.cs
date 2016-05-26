@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -93,13 +94,13 @@ namespace IWantUWindowClient
             => await _proxy.ChooseUser(SelectedFriend.Id);
 
         public async Task SendMessageAsync()
-            => await _proxy.SendMessageAsync(Message, SelectedFriend.Id);
+        {
+            await _proxy.SendMessageAsync(Message, SelectedFriend.Id);
+            Message = null;
+        }
 
         public async Task SignInAsync()
-        {
-            await _proxy.ConnectAsync();
-            await _proxy.SignInAsync(Name);
-        }
+            => await _proxy.SignInAsync(Name);
         #endregion
 
 
@@ -114,16 +115,28 @@ namespace IWantUWindowClient
         {
             var friend = GetFriend(e.Id);
             string title, content;
-            if (e.IsChosen)
+            switch (e.ChoiceResult)
             {
-                title = "Congratulation!";
-                content = $"{friend.Name} chose you.";
+                case ChoiceResult.Undone:
+                    title = "Wait!";
+                    content = $"{friend.Name} didn't make a choice.";
+                    break;
+                case ChoiceResult.Successful:
+                    title = "Congratulation!";
+                    content = $"{friend.Name} chose you.";
+                    break;
+                case ChoiceResult.Failed:
+                    title = "Sorry!";
+                    content = $"{friend.Name} didn't choose you.";
+                    break;
+                case ChoiceResult.Done:
+                    title = "Error!";
+                    content = "You completed your choice.";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
-            {
-                title = "Sorry!";
-                content = $"{friend.Name} didn't choose you.";
-            }
+
             NotificationRequestProvider.NotifyOnUiThread(title, content);
         }
 
@@ -139,11 +152,9 @@ namespace IWantUWindowClient
 
 
         #region Implementation
-        private void AddFriendOnUiThread(Account account)
-            => TryInvokeOnUiThread(() => _friends.Add(account));
+        private void AddFriendOnUiThread(Account account) => TryInvokeOnUiThread(() => _friends.Add(account));
 
-        private Account GetFriend(string id)
-            => Friends.FirstOrDefault(f => f.Id == id);
+        private Account GetFriend(string id) => Friends.FirstOrDefault(f => f.Id == id);
 
         private Message GetMessage(string friendId)
         {
@@ -160,3 +171,11 @@ namespace IWantUWindowClient
         #endregion
     }
 }
+
+
+// TODO: UI - MahApps
+// TODO: CanConnect, CanSignIn, CanSendMessge, CanChoose
+// TODO: Textbox ScrollToEnd, EnterToClick
+// TODO: Confirm when make choice
+// TODO: Allow rechoose??
+// TODO: WebServer

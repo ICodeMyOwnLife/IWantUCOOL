@@ -7,7 +7,7 @@ namespace IWantUInfrastructure
     {
         #region  Properties & Indexers
         public string Id { get; set; }
-        public bool IsChosen { get; set; }
+        public ChoiceResult ChoiceResult { get; set; }
         #endregion
     }
 }

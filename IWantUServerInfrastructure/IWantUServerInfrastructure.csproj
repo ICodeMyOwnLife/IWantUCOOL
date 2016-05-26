@@ -96,6 +96,10 @@
       <Project>{7277C78D-A76E-4117-A4BE-3F4C6068B04F}</Project>
       <Name>CB.Net.SignalR</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IWantUInfrastructure\IWantUInfrastructure.csproj">
+      <Project>{DFDB899C-4BE5-4CEB-9A43-C0AF7A681DC8}</Project>
+      <Name>IWantUInfrastructure</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\jquery-2.2.3.intellisense.js" />
