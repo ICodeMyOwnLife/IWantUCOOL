@@ -35,12 +35,15 @@ namespace IWantUWindowClient
             _proxy.NewAccountReceived += Proxy_NewAccountReceived;
             ChooseFriendAsyncCommand = DelegateCommand.FromAsyncHandler(ChooseFriendAsync);
             SendMessageAsyncCommand = DelegateCommand.FromAsyncHandler(SendMessageAsync);
-            SignInAsyncCommand = DelegateCommand.FromAsyncHandler(SignInAsync);
+            SignInAsyncCommand = DelegateCommand.FromAsyncHandler(SignInAsync, () => CanSignIn);
+            SignOutCommand = DelegateCommand.FromAsyncHandler(SignOutAsync, () => CanSignOut);
         }
         #endregion
 
 
         #region  Properties & Indexers
+        public bool CanSignIn => _proxy.CanSignIn;
+        public bool CanSignOut => _proxy.CanSignOut;
         public ICommand ChooseFriendAsyncCommand { get; }
 
         public IEnumerable<Account> Friends
@@ -86,6 +89,7 @@ namespace IWantUWindowClient
         public ICommand SendMessageAsyncCommand { get; }
 
         public ICommand SignInAsyncCommand { get; }
+        public ICommand SignOutCommand { get; }
         #endregion
 
 
@@ -100,7 +104,20 @@ namespace IWantUWindowClient
         }
 
         public async Task SignInAsync()
-            => await _proxy.SignInAsync(Name);
+        {
+            if (!CanSignIn) return;
+
+            await _proxy.SignInAsync(Name);
+            NotifySignabilityChanged();
+        }
+
+        public async Task SignOutAsync()
+        {
+            if (!CanSignOut) return;
+
+            await _proxy.SignOutAsync();
+            NotifySignabilityChanged();
+        }
         #endregion
 
 
@@ -164,6 +181,12 @@ namespace IWantUWindowClient
                 _messages.Add(msg = new Message { Friend = Friends.FirstOrDefault(a => a.Id == friendId) });
             }
             return msg;
+        }
+
+        protected virtual void NotifySignabilityChanged()
+        {
+            NotifyPropertiesChanged(nameof(CanSignIn), nameof(CanSignOut));
+            RaiseCommandsCanExecuteChanged(SignInAsyncCommand, SignOutCommand);
         }
 
         private void RemoveFriendOnUiThread(string accountId)

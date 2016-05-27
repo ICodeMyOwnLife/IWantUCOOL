@@ -1,13 +1,14 @@
-﻿<Window x:Class="IWantUWindowClient.IWantUClientWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:IWantUWindowClient"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:prm="http://prismlibrary.com/"
-        mc:Ignorable="d"
-        Title="I Want U Client" Height="520" Width="460">
+﻿<mah:MetroWindow x:Class="IWantUWindowClient.IWantUClientWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:local="clr-namespace:IWantUWindowClient"
+                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                 xmlns:prm="http://prismlibrary.com/"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 mc:Ignorable="d"
+                 Title="I Want U Client" Height="520" Width="460">
 
     <Window.DataContext>
         <local:IWanUClientViewModel />
@@ -15,7 +16,7 @@
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
-            <prm:InvokeCommandAction Command="{Binding DisconnectCommand}" />
+            <prm:InvokeCommandAction Command="{Binding DisconnectCommand}" AutoEnable="False" />
         </i:EventTrigger>
 
         <prm:InteractionRequestTrigger
@@ -41,7 +42,11 @@
                 Command="{Binding ConnectAsyncCommand}" />
 
         <TextBox Grid.Row="0" Grid.Column="1"
-                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding SignInAsyncCommand}" />
+            </TextBox.InputBindings>
+        </TextBox>
 
 
         <Button Grid.Row="0" Grid.Column="2" Content="Sign In"
@@ -51,7 +56,11 @@
                 Command="{Binding ChooseFriendAsyncCommand}" />
 
         <TextBox Grid.Row="1" Grid.Column="1"
-                 Text="{Binding Message}" />
+                 Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding SendMessageAsyncCommand}" />
+            </TextBox.InputBindings>
+        </TextBox>
 
         <Button Grid.Row="1" Grid.Column="2" Content="Send"
                 Command="{Binding SendMessageAsyncCommand}" />
@@ -67,7 +76,11 @@
                      SelectedItem="{Binding SelectedFriend}" />
 
             <TextBox Grid.Column="1"
-                     Text="{Binding SelectedMessage.Content, Mode=OneWay}" />
+                     Text="{Binding SelectedMessage.Content, Mode=OneWay}">
+                <i:Interaction.Behaviors>
+                    <StaticResource ResourceKey="ScrollToEndBehavior" />
+                </i:Interaction.Behaviors>
+            </TextBox>
         </Grid>
     </Grid>
-</Window>
+</mah:MetroWindow>

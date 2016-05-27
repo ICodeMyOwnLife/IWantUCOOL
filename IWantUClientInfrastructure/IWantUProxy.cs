@@ -18,6 +18,13 @@ namespace IWantUClientInfrastructure
         #endregion
 
 
+        #region  Properties & Indexers
+        public bool CanSignIn => IsSignedIn == false;
+        public bool CanSignOut => IsSignedIn;
+        public bool IsSignedIn { get; protected set; }
+        #endregion
+
+
         #region Events
         public event EventHandler<AccountRemovedEventArgs> AccountRemoved;
         public event EventHandler<AccountsReceivedEventArgs> AccountsReceived;
@@ -38,7 +45,32 @@ namespace IWantUClientInfrastructure
             => await TryAsync(async () => await _hubProxy.Invoke("SendMessage", message, receiverId));
 
         public virtual async Task SignInAsync(string name)
-            => await TryAsync(async () => await _hubProxy.Invoke("SignIn", name));
+        {
+            if (!CanSignIn)
+            {
+                OnError("Client was signed in.");
+                return;
+            }
+            await TryAsync(async () =>
+            {
+                await _hubProxy.Invoke("SignIn", name);
+                IsSignedIn = true;
+            });
+        }
+
+        public virtual async Task SignOutAsync()
+        {
+            if (!CanSignOut)
+            {
+                OnError("Client was not signed in.");
+                return;
+            }
+            await TryAsync(async () =>
+            {
+                await _hubProxy.Invoke("SignOut");
+                IsSignedIn = false;
+            });
+        }
         #endregion
 
 

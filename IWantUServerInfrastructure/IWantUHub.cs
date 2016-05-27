@@ -71,16 +71,16 @@ namespace IWantUServerInfrastructure
 
             _logger.Log($"{id} is signed in as {name}");
         }
+
+        public void SignOut()
+            => SignOut(Context.ConnectionId);
         #endregion
 
 
         #region Override
         public override Task OnDisconnected(bool stopCalled)
         {
-            string name;
-            var id = Context.ConnectionId;
-            _idNameDictionary.TryRemove(id, out name);
-            Clients.Others.removeAccount(id);
+            SignOut(Context.ConnectionId);
             return base.OnDisconnected(stopCalled);
         }
         #endregion
@@ -95,6 +95,15 @@ namespace IWantUServerInfrastructure
 
         private void SendUsersTo(string connectionId)
             => Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
+
+        private void SignOut(string id)
+        {
+            string name;
+            if (_idNameDictionary.TryRemove(id, out name))
+            {
+                Clients.Others.removeAccount(id);
+            }
+        }
         #endregion
     }
 }
