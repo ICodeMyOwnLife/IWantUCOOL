@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -16,34 +17,85 @@ namespace IWantUWindowClient
     public class IWanUClientViewModel: SignalRClientViewModelBase<IWantUProxy>
     {
         #region Fields
+        private bool _canChooseFriend;
+
+        private bool _canSendMessage;
+        private bool _canSignIn;
+        private bool _canSignOut;
         private ObservableCollection<Account> _friends = new ObservableCollection<Account>();
         private string _message;
         private readonly IList<Message> _messages = new List<Message>();
-        private string _name;
         private Account _selectedFriend;
         private Message _selectedMessage;
+        private string _userName;
         #endregion
 
 
         #region  Constructors & Destructor
-        public IWanUClientViewModel(): base(new IWantUProxy())
+        public IWanUClientViewModel()
         {
-            _proxy.AccountsReceived += Proxy_AccountsReceived;
+            /*_proxy.AccountsReceived += Proxy_AccountsReceived;
             _proxy.AccountRemoved += Proxy_AccountRemoved;
             _proxy.ChosenAnnounced += Proxy_ChosenAnnounced;
             _proxy.MessagedReceived += Proxy_MessagedReceived;
-            _proxy.NewAccountReceived += Proxy_NewAccountReceived;
-            ChooseFriendAsyncCommand = DelegateCommand.FromAsyncHandler(ChooseFriendAsync);
-            SendMessageAsyncCommand = DelegateCommand.FromAsyncHandler(SendMessageAsync);
+            _proxy.NewAccountReceived += Proxy_NewAccountReceived;*/
+            ChooseFriendAsyncCommand = DelegateCommand.FromAsyncHandler(ChooseFriendAsync, () => CanChooseFriend);
+            SendMessageAsyncCommand = DelegateCommand.FromAsyncHandler(SendMessageAsync, () => CanSendMessage);
             SignInAsyncCommand = DelegateCommand.FromAsyncHandler(SignInAsync, () => CanSignIn);
-            SignOutCommand = DelegateCommand.FromAsyncHandler(SignOutAsync, () => CanSignOut);
+            SignOutAsyncCommand = DelegateCommand.FromAsyncHandler(SignOutAsync, () => CanSignOut);
         }
         #endregion
 
 
         #region  Properties & Indexers
-        public bool CanSignIn => _proxy.CanSignIn;
-        public bool CanSignOut => _proxy.CanSignOut;
+        public virtual bool CanChooseFriend
+        {
+            get { return _canChooseFriend; }
+            protected set
+            {
+                if (SetProperty(ref _canChooseFriend, value))
+                {
+                    RaiseCommandsCanExecuteChanged(ChooseFriendAsyncCommand);
+                }
+            }
+        }
+
+        public virtual bool CanSendMessage
+        {
+            get { return _canSendMessage; }
+            protected set
+            {
+                if (SetProperty(ref _canSendMessage, value))
+                {
+                    RaiseCommandsCanExecuteChanged(SendMessageAsyncCommand);
+                }
+            }
+        }
+
+        public virtual bool CanSignIn
+        {
+            get { return _canSignIn; }
+            protected set
+            {
+                if (SetProperty(ref _canSignIn, value))
+                {
+                    RaiseSigningCanExecuteChanged();
+                }
+            }
+        }
+
+        public virtual bool CanSignOut
+        {
+            get { return _canSignOut; }
+            protected set
+            {
+                if (SetProperty(ref _canSignOut, value))
+                {
+                    RaiseSigningCanExecuteChanged();
+                }
+            }
+        }
+
         public ICommand ChooseFriendAsyncCommand { get; }
 
         public IEnumerable<Account> Friends
@@ -59,13 +111,13 @@ namespace IWantUWindowClient
         public string Message
         {
             get { return _message; }
-            set { SetProperty(ref _message, value); }
-        }
-
-        public string Name
-        {
-            get { return _name; }
-            set { SetProperty(ref _name, value); }
+            set
+            {
+                if (SetProperty(ref _message, value))
+                {
+                    SetSendMessageAbility();
+                }
+            }
         }
 
         public Account SelectedFriend
@@ -76,6 +128,7 @@ namespace IWantUWindowClient
                 if (SetProperty(ref _selectedFriend, value))
                 {
                     SelectedMessage = GetMessage(value.Id);
+                    SetChoosingAbility();
                 }
             }
         }
@@ -87,9 +140,20 @@ namespace IWantUWindowClient
         }
 
         public ICommand SendMessageAsyncCommand { get; }
-
         public ICommand SignInAsyncCommand { get; }
-        public ICommand SignOutCommand { get; }
+        public ICommand SignOutAsyncCommand { get; }
+
+        public string UserName
+        {
+            get { return _userName; }
+            set
+            {
+                if (SetProperty(ref _userName, value))
+                {
+                    SetSigningAbility();
+                }
+            }
+        }
         #endregion
 
 
@@ -107,8 +171,7 @@ namespace IWantUWindowClient
         {
             if (!CanSignIn) return;
 
-            await _proxy.SignInAsync(Name);
-            NotifySignabilityChanged();
+            await _proxy.SignInAsync(UserName);
         }
 
         public async Task SignOutAsync()
@@ -116,7 +179,23 @@ namespace IWantUWindowClient
             if (!CanSignOut) return;
 
             await _proxy.SignOutAsync();
-            NotifySignabilityChanged();
+        }
+        #endregion
+
+
+        #region Override
+        protected override void OnProxyPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnProxyPropertyChanged(sender, e);
+            switch (e.PropertyName)
+            {
+                case nameof(IWantUProxy.SignState):
+                case nameof(IWantUProxy.ConnectionState):
+                    SetSigningAbility();
+                    SetSendMessageAbility();
+                    SetChoosingAbility();
+                    break;
+            }
         }
         #endregion
 
@@ -183,21 +262,30 @@ namespace IWantUWindowClient
             return msg;
         }
 
-        protected virtual void NotifySignabilityChanged()
+        private void RaiseSigningCanExecuteChanged()
         {
-            NotifyPropertiesChanged(nameof(CanSignIn), nameof(CanSignOut));
-            RaiseCommandsCanExecuteChanged(SignInAsyncCommand, SignOutCommand);
+            RaiseCommandsCanExecuteChanged(SignInAsyncCommand, SignOutAsyncCommand);
         }
 
         private void RemoveFriendOnUiThread(string accountId)
             => TryInvokeOnUiThread(() => _friends.Remove(_friends.FirstOrDefault(f => f.Id == accountId)));
+
+        private void SetChoosingAbility()
+            => CanChooseFriend = _proxy.CanChooseFriend() && SelectedFriend != null;
+
+        private void SetSendMessageAbility()
+            => CanSendMessage = _proxy.CanSendMessage() && !string.IsNullOrEmpty(Message) && SelectedFriend != null;
+
+        private void SetSigningAbility()
+        {
+            CanSignIn = _proxy.CanSignIn() && !string.IsNullOrEmpty(UserName);
+            CanSignOut = _proxy.CanSignOut();
+        }
         #endregion
     }
 }
 
-
-// TODO: UI - MahApps
-// TODO: CanConnect, CanSignIn, CanSendMessge, CanChoose
+// TODO: Proxy.On
 // TODO: Textbox ScrollToEnd, EnterToClick
 // TODO: Confirm when make choice
 // TODO: Allow rechoose??

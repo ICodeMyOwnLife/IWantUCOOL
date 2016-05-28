@@ -69,7 +69,7 @@ namespace IWantUServerInfrastructure
             _idNameDictionary[id] = name;
             SendUsersTo(Context.ConnectionId);
 
-            _logger.Log($"{id} is signed in as {name}");
+            _logger.Log($"{id} was signed in as {name}.");
         }
 
         public void SignOut()
@@ -102,6 +102,7 @@ namespace IWantUServerInfrastructure
             if (_idNameDictionary.TryRemove(id, out name))
             {
                 Clients.Others.removeAccount(id);
+                _logger.Log($"{id} was signed out.");
             }
         }
         #endregion

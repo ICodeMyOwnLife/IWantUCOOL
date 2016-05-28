@@ -60,6 +60,10 @@
       <Project>{9f2166ae-f09b-49c1-9b6d-2ee861593a73}</Project>
       <Name>CB.Configuration.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Model\CB.Model.Common\CB.Model.Common.csproj">
+      <Project>{33A5DF99-1312-4023-A6EF-EABB9848F5A6}</Project>
+      <Name>CB.Model.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR.Client\CB.Net.SignalR.Client.csproj">
       <Project>{347FD783-6E7B-415E-BD4F-AED6B82A4879}</Project>
       <Name>CB.Net.SignalR.Client</Name>

@@ -16,7 +16,7 @@
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
-            <prm:InvokeCommandAction Command="{Binding DisconnectCommand}" AutoEnable="False" />
+            <prm:InvokeCommandAction Command="{Binding DisconnectAsyncCommand}" AutoEnable="False" />
         </i:EventTrigger>
 
         <prm:InteractionRequestTrigger
@@ -30,6 +30,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -39,18 +40,28 @@
         </Grid.ColumnDefinitions>
 
         <Button Grid.Row="0" Grid.Column="0" Content="Connect"
-                Command="{Binding ConnectAsyncCommand}" />
+                Command="{Binding ConnectAsyncCommand}"
+                Visibility="{Binding CanDisconnect, Converter={StaticResource InvisibilityConverter}}" />
+
+        <Button Grid.Row="0" Grid.Column="0" Content="Disconnect"
+                Command="{Binding DisconnectAsyncCommand}"
+                Visibility="{Binding CanDisconnect, Converter={StaticResource VisibilityConverter}}" />
 
         <TextBox Grid.Row="0" Grid.Column="1"
-                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
+                 Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"
+                 IsEnabled="{Binding CanSignOut, Converter={StaticResource BooleanNotConverter}}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter" Command="{Binding SignInAsyncCommand}" />
             </TextBox.InputBindings>
         </TextBox>
 
-
         <Button Grid.Row="0" Grid.Column="2" Content="Sign In"
-                Command="{Binding SignInAsyncCommand}" />
+                Command="{Binding SignInAsyncCommand}"
+                Visibility="{Binding CanSignOut, Converter={StaticResource InvisibilityConverter}}" />
+
+        <Button Grid.Row="0" Grid.Column="2" Content="Sign Out"
+                Command="{Binding SignOutAsyncCommand}"
+                Visibility="{Binding CanSignOut, Converter={StaticResource VisibilityConverter}}" />
 
         <Button Grid.Row="1" Grid.Column="0" Content="Choose"
                 Command="{Binding ChooseFriendAsyncCommand}" />
@@ -76,11 +87,22 @@
                      SelectedItem="{Binding SelectedFriend}" />
 
             <TextBox Grid.Column="1"
-                     Text="{Binding SelectedMessage.Content, Mode=OneWay}">
-                <i:Interaction.Behaviors>
-                    <StaticResource ResourceKey="ScrollToEndBehavior" />
-                </i:Interaction.Behaviors>
-            </TextBox>
+                     Text="{Binding SelectedMessage.Content, Mode=OneWay}"
+                     Style="{StaticResource TextBox.MultiLine.ReadOnly}"/>
         </Grid>
+
+        <!--For Debug Only-->
+        <!--<Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="{Binding CanConnect}" />
+
+            <TextBlock Grid.Column="1"
+                       Text="{Binding CanDisconnect}" />
+        </Grid>-->
     </Grid>
 </mah:MetroWindow>

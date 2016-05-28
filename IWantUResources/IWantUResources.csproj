@@ -116,6 +116,10 @@
       <Project>{033B6C10-B667-4B70-AA49-E61F6C8AA084}</Project>
       <Name>CB.Xaml.Behaviors</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Xaml\CB.Xaml.ValueConverters\CB.Xaml.ValueConverters.csproj">
+      <Project>{3C46F9A4-7A8B-4588-872F-60B36E471FC5}</Project>
+      <Name>CB.Xaml.ValueConverters</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\WindowsIcons-license.txt" />

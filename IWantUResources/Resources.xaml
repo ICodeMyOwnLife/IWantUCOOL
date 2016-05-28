@@ -18,6 +18,18 @@
 
     <Thickness x:Key="NormalMargin">8</Thickness>
 
+    <xaml:BooleanToValueConverter x:Key="VisibilityConverter"
+                                  ValueIfNull="{x:Static Visibility.Collapsed}"
+                                  ValueIfTrue="{x:Static Visibility.Visible}"
+                                  ValueIfFalse="{x:Static Visibility.Hidden}" />
+
+    <xaml:BooleanToValueConverter x:Key="InvisibilityConverter"
+                                  ValueIfNull="{x:Static Visibility.Collapsed}"
+                                  ValueIfTrue="{x:Static Visibility.Hidden}"
+                                  ValueIfFalse="{x:Static Visibility.Visible}" />
+
+    <xaml:BooleanNotConverter x:Key="BooleanNotConverter" />
+
     <xaml:ScrollWhenTextChangedBehavior x:Key="ScrollToEndBehavior" x:Shared="False" ScrollPosition="ScrollToEnd" />
 
     <Style TargetType="Button" BasedOn="{StaticResource MetroAccentButton}">
@@ -35,8 +47,8 @@
     </Style>
 
     <Style x:Key="TextBox.MultiLine.ReadOnly" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="xaml:InteractionServices.Behaviors">
             <Setter.Value>
                 <xaml:BehaviorList>

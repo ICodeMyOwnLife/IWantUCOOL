@@ -4,10 +4,9 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:local="clr-namespace:IWantUWindowServer"
-                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
-                 Title="IWantUServerWindow" Height="350" Width="525">
+                 Title="I Want U Server" Height="350" Width="525">
 
     <Window.DataContext>
         <local:IWantUServerViewModel />
@@ -19,19 +18,16 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Content="Start Server"
+                Command="{Binding StartServerAsyncCommand}"
+                Visibility="{Binding CanStopServer, Converter={StaticResource InvisibilityConverter}}"/>
 
-        <Button Grid.Row="0" Grid.Column="1" Content="Start Server"
-                Command="{Binding StartServerAsyncCommand}" />
+        <Button Grid.Row="0" Content="Stop Server"
+                Command="{Binding StopServerCommand}"
+                Visibility="{Binding CanStopServer, Converter={StaticResource VisibilityConverter}}"/>
 
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                 Text="{Binding LogMessage, Mode=OneWay}">
-            <i:Interaction.Behaviors>
-                <StaticResource ResourceKey="ScrollToEndBehavior" />
-            </i:Interaction.Behaviors>
-        </TextBox>
+        <TextBox Grid.Row="1"
+                 Text="{Binding LogMessage, Mode=OneWay}"
+                 Style="{StaticResource TextBox.MultiLine.ReadOnly}"/>
     </Grid>
 </mah:MetroWindow>
