@@ -8,6 +8,7 @@
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.textblock.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.textbox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.listbox.xaml" />
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/styles/vs/listbox.xaml" />
@@ -40,6 +41,11 @@
 
     <Style TargetType="ListBox" BasedOn="{StaticResource MetroListBox}">
         <Setter Property="Margin" Value="{StaticResource NormalMargin}" />
+    </Style>
+
+    <Style x:Key="TextBlock" TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
+        <Setter Property="Margin" Value="{StaticResource NormalMargin}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style TargetType="TextBox" BasedOn="{StaticResource MetroTextBox}">

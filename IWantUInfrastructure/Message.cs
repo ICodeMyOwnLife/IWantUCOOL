@@ -24,9 +24,12 @@ namespace IWantUInfrastructure
 
         #region Methods
         public void AddMessageContent(string messageContent)
-            => Content = Content == null
-                             ? messageContent
-                             : $"{Content}{Environment.NewLine}{Friend.Name}: {messageContent}";
+        {
+            var messageLine = $"{Friend.Name}: {messageContent}";
+            Content = Content == null
+                          ? messageLine
+                          : $"{Content}{Environment.NewLine}{messageLine}";
+        }
         #endregion
     }
 }

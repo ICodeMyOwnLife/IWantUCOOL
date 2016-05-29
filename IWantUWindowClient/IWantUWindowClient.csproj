@@ -57,6 +57,10 @@
       <HintPath>..\packages\MaterialDesignThemes.1.5.0.523\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Practices.Prism.Mvvm">
       <HintPath>..\..\..\..\Libraries\DotNet\CB.Model\packages\Prism.Mvvm.1.1.1\lib\net45\Microsoft.Practices.Prism.Mvvm.dll</HintPath>
     </Reference>
@@ -65,6 +69,10 @@
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Prism.Wpf, Version=6.1.0.0, Culture=neutral, PublicKeyToken=91a96d2a154366d8, processorArchitecture=MSIL">
@@ -96,7 +104,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="IWantUClientWindow.xaml">
+    <Compile Include="ViewModels\CreateGroupViewModel.cs" />
+    <Compile Include="Views\CreateGroupWindow.xaml.cs">
+      <DependentUpon>CreateGroupWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Views\IWantUClientWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -104,8 +116,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IWanUClientViewModel.cs" />
-    <Compile Include="IWantUClientWindow.xaml.cs">
+    <Compile Include="ViewModels\IWanUClientViewModel.cs" />
+    <Compile Include="Views\IWantUClientWindow.xaml.cs">
       <DependentUpon>IWantUClientWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -116,6 +128,10 @@
     <Page Include="Resources\IconsNonShared.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CreateGroupWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +175,14 @@
     <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Net\CB.Net.SignalR\CB.Net.SignalR.csproj">
       <Project>{7277c78d-a76e-4117-a4be-3f4c6068b04f}</Project>
       <Name>CB.Net.SignalR</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Prism\CB.Prism.Interactivity\CB.Prism.Interactivity.csproj">
+      <Project>{640C072B-F368-4D76-9969-9C6BFE4070D3}</Project>
+      <Name>CB.Prism.Interactivity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Xaml\CB.Xaml.AttachedProperties\CB.Xaml.AttachedProperties.csproj">
+      <Project>{1CCB7F4E-228A-4A8E-A211-A032C9C8767B}</Project>
+      <Name>CB.Xaml.AttachedProperties</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\Libraries\DotNet\CB.Xaml\CB.Xaml.Behaviors\CB.Xaml.Behaviors.csproj">
       <Project>{033b6c10-b667-4b70-aa49-e61f6c8aa084}</Project>

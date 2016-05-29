@@ -6,19 +6,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CB.Net.SignalR.Client;
+using CB.Prism.Interactivity;
 using IWantUClientInfrastructure;
 using IWantUInfrastructure;
+using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Practices.Prism.Commands;
 
 
-namespace IWantUWindowClient
+namespace IWantUWindowClient.ViewModels
 {
     // ReSharper disable once InconsistentNaming
     public class IWanUClientViewModel: SignalRClientViewModelBase<IWantUProxy>
     {
         #region Fields
         private bool _canChooseFriend;
-
         private bool _canSendMessage;
         private bool _canSignIn;
         private bool _canSignOut;
@@ -34,16 +35,21 @@ namespace IWantUWindowClient
         #region  Constructors & Destructor
         public IWanUClientViewModel()
         {
-            /*_proxy.AccountsReceived += Proxy_AccountsReceived;
-            _proxy.AccountRemoved += Proxy_AccountRemoved;
-            _proxy.ChosenAnnounced += Proxy_ChosenAnnounced;
-            _proxy.MessagedReceived += Proxy_MessagedReceived;
-            _proxy.NewAccountReceived += Proxy_NewAccountReceived;*/
+            AddGroupCommand = new DelegateCommand(AddGroup);
             ChooseFriendAsyncCommand = DelegateCommand.FromAsyncHandler(ChooseFriendAsync, () => CanChooseFriend);
             SendMessageAsyncCommand = DelegateCommand.FromAsyncHandler(SendMessageAsync, () => CanSendMessage);
             SignInAsyncCommand = DelegateCommand.FromAsyncHandler(SignInAsync, () => CanSignIn);
             SignOutAsyncCommand = DelegateCommand.FromAsyncHandler(SignOutAsync, () => CanSignOut);
         }
+        #endregion
+
+
+        #region  Commands
+        public ICommand AddGroupCommand { get; }
+        public ICommand ChooseFriendAsyncCommand { get; }
+        public ICommand SendMessageAsyncCommand { get; }
+        public ICommand SignInAsyncCommand { get; }
+        public ICommand SignOutAsyncCommand { get; }
         #endregion
 
 
@@ -96,7 +102,8 @@ namespace IWantUWindowClient
             }
         }
 
-        public ICommand ChooseFriendAsyncCommand { get; }
+        public ConfirmationInteractionRequest<CreateGroupViewModel> CreateGroupRequest { get; } =
+            new ConfirmationInteractionRequest<CreateGroupViewModel>();
 
         public IEnumerable<Account> Friends
         {
@@ -139,10 +146,6 @@ namespace IWantUWindowClient
             private set { SetProperty(ref _selectedMessage, value); }
         }
 
-        public ICommand SendMessageAsyncCommand { get; }
-        public ICommand SignInAsyncCommand { get; }
-        public ICommand SignOutAsyncCommand { get; }
-
         public string UserName
         {
             get { return _userName; }
@@ -158,6 +161,20 @@ namespace IWantUWindowClient
 
 
         #region Methods
+        public void AddGroup()
+        {
+            var vmd = new CreateGroupViewModel { Accounts = Friends };
+            CreateGroupRequest.Raise(vmd, async res =>
+            {
+                if (!res.Confirmed || !(res.SelectedAccounts?.Count > 0)) return;
+                
+                var groupId = await _proxy.AddGroupAsync(res.GroupName,
+                    res.SelectedAccounts.OfType<Account>().Select(a => a.Id));
+
+                NotificationRequestProvider.Notify("Group Id", groupId);
+            });
+        }
+
         public async Task ChooseFriendAsync()
             => await _proxy.ChooseUser(SelectedFriend.Id);
 
@@ -184,6 +201,18 @@ namespace IWantUWindowClient
 
 
         #region Override
+        protected override void InitializeHubProxy(IHubProxy hubProxy)
+        {
+            base.InitializeHubProxy(hubProxy);
+
+            hubProxy.On<string, ChoiceResult>("announceChosen", Proxy_ChosenAnnounced);
+            hubProxy.On<IEnumerable<KeyValuePair<string, string>>>("receiveAccounts", Proxy_AccountsReceived);
+            hubProxy.On<string, string>("receiveNewAccount",
+                Proxy_NewAccountReceived);
+            hubProxy.On<string, string>("receiveMessage", Proxy_MessagedReceived);
+            hubProxy.On<string>("removeAccount", Proxy_AccountRemoved);
+        }
+
         protected override void OnProxyPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             base.OnProxyPropertyChanged(sender, e);
@@ -200,18 +229,41 @@ namespace IWantUWindowClient
         #endregion
 
 
-        #region Event Handlers
-        private void Proxy_AccountRemoved(object sender, AccountRemovedEventArgs e)
-            => RemoveFriendOnUiThread(e.Id);
+        #region Implementation
+        private void AddFriendOnUiThread(Account account) => TryInvokeOnUiThread(() => _friends.Add(account));
 
-        private void Proxy_AccountsReceived(object sender, AccountsReceivedEventArgs e)
-            => Friends = new ObservableCollection<Account>(e.Accounts);
+        private Account GetFriend(string id)
+            => Friends.FirstOrDefault(f => f.Id == id);
 
-        private void Proxy_ChosenAnnounced(object sender, ChosenAnnouncedEventArgs e)
+        private Message GetMessage(string friendId)
         {
-            var friend = GetFriend(e.Id);
+            var msg = _messages.FirstOrDefault(m => m.Friend.Id == friendId);
+            if (msg == null)
+            {
+                _messages.Add(msg = new Message { Friend = Friends.FirstOrDefault(a => a.Id == friendId) });
+            }
+            return msg;
+        }
+
+        private void Proxy_AccountRemoved(string id)
+        {
+            var removedFriend = GetFriend(id);
+            RemoveFriendOnUiThread(removedFriend);
+            if (SelectedFriend == removedFriend)
+            {
+                SelectedFriend = Friends.FirstOrDefault();
+            }
+        }
+
+        private void Proxy_AccountsReceived(IEnumerable<KeyValuePair<string, string>> accountPairs)
+            => Friends =
+               new ObservableCollection<Account>(accountPairs.Select(p => new Account { Id = p.Key, Name = p.Value }));
+
+        private void Proxy_ChosenAnnounced(string id, ChoiceResult result)
+        {
+            var friend = GetFriend(id);
             string title, content;
-            switch (e.ChoiceResult)
+            switch (result)
             {
                 case ChoiceResult.Undone:
                     title = "Wait!";
@@ -236,39 +288,22 @@ namespace IWantUWindowClient
             NotificationRequestProvider.NotifyOnUiThread(title, content);
         }
 
-        private void Proxy_MessagedReceived(object sender, MessageReceivedEventArgs e)
+        private void Proxy_MessagedReceived(string message, string senderId)
         {
-            SelectedFriend = Friends.FirstOrDefault(f => f.Id == e.SenderId);
-            SelectedMessage.AddMessageContent(e.Message);
+            SelectedFriend = GetFriend(senderId);
+            SelectedMessage.AddMessageContent(message);
         }
 
-        private void Proxy_NewAccountReceived(object sender, AccountReceivedEventArgs e)
-            => AddFriendOnUiThread(e.Account);
-        #endregion
-
-
-        #region Implementation
-        private void AddFriendOnUiThread(Account account) => TryInvokeOnUiThread(() => _friends.Add(account));
-
-        private Account GetFriend(string id) => Friends.FirstOrDefault(f => f.Id == id);
-
-        private Message GetMessage(string friendId)
-        {
-            var msg = _messages.FirstOrDefault(m => m.Friend.Id == friendId);
-            if (msg == null)
-            {
-                _messages.Add(msg = new Message { Friend = Friends.FirstOrDefault(a => a.Id == friendId) });
-            }
-            return msg;
-        }
+        private void Proxy_NewAccountReceived(string id, string name)
+            => AddFriendOnUiThread(new Account { Id = id, Name = name });
 
         private void RaiseSigningCanExecuteChanged()
         {
             RaiseCommandsCanExecuteChanged(SignInAsyncCommand, SignOutAsyncCommand);
         }
 
-        private void RemoveFriendOnUiThread(string accountId)
-            => TryInvokeOnUiThread(() => _friends.Remove(_friends.FirstOrDefault(f => f.Id == accountId)));
+        private void RemoveFriendOnUiThread(Account account)
+            => TryInvokeOnUiThread(() => _friends.Remove(account));
 
         private void SetChoosingAbility()
             => CanChooseFriend = _proxy.CanChooseFriend() && SelectedFriend != null;
@@ -285,8 +320,9 @@ namespace IWantUWindowClient
     }
 }
 
-// TODO: Proxy.On
-// TODO: Textbox ScrollToEnd, EnterToClick
+
+// TODO: Implement group, chat group
+// TODO: Full Message (1st person, group person, media)
 // TODO: Confirm when make choice
 // TODO: Allow rechoose??
 // TODO: WebServer

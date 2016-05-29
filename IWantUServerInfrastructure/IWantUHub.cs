@@ -1,5 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CB.Model.Common;
 using CB.Net.SignalR.Server;
@@ -12,10 +15,10 @@ namespace IWantUServerInfrastructure
     public class IWantUHub: SignalRHubBase
     {
         #region Fields
-        private static readonly ConcurrentDictionary<string, string> _coupleChoices =
+        private static readonly ConcurrentDictionary<string, string> _accountDictionary =
             new ConcurrentDictionary<string, string>();
 
-        private static readonly ConcurrentDictionary<string, string> _idNameDictionary =
+        private static readonly ConcurrentDictionary<string, string> _coupleChoices =
             new ConcurrentDictionary<string, string>();
         #endregion
 
@@ -28,6 +31,17 @@ namespace IWantUServerInfrastructure
 
 
         #region Methods
+        public string AddGroup(string groupName, IEnumerable<string> ids)
+        {
+            var groupId = Guid.NewGuid().ToString();
+            foreach (var id in ids)
+            {
+                Groups.Add(id, groupId);
+            }
+            Groups.Add(Context.ConnectionId, groupId);
+            return groupId;
+        }
+
         public void ChooseAccount(string receiverId)
         {
             var senderId = Context.ConnectionId;
@@ -62,11 +76,14 @@ namespace IWantUServerInfrastructure
         public void SendMessage(string message, string receiverId)
             => Clients.Client(receiverId).receiveMessage(message, Context.ConnectionId);
 
+        public void SendMessageToGroup(string message, string groupId)
+            => Clients.Group(groupId).receiveMessageFromGroup(message, groupId, Context.ConnectionId);
+
         public void SignIn(string name)
         {
             var id = Context.ConnectionId;
-            Clients.Clients(_idNameDictionary.Keys.ToList()).receiveNewAccount(id, name);
-            _idNameDictionary[id] = name;
+            Clients.Clients(_accountDictionary.Keys.ToList()).receiveNewAccount(id, name);
+            _accountDictionary[id] = name;
             SendUsersTo(Context.ConnectionId);
 
             _logger.Log($"{id} was signed in as {name}.");
@@ -90,16 +107,17 @@ namespace IWantUServerInfrastructure
         private static string GetName(string accountId)
         {
             string name;
-            return _idNameDictionary.TryGetValue(accountId, out name) ? name : null;
+            return _accountDictionary.TryGetValue(accountId, out name) ? name : null;
         }
 
         private void SendUsersTo(string connectionId)
-            => Clients.Client(connectionId).receiveAccounts(_idNameDictionary.Where(p => p.Key != Context.ConnectionId));
+            =>
+                Clients.Client(connectionId).receiveAccounts(_accountDictionary.Where(p => p.Key != Context.ConnectionId));
 
         private void SignOut(string id)
         {
             string name;
-            if (_idNameDictionary.TryRemove(id, out name))
+            if (_accountDictionary.TryRemove(id, out name))
             {
                 Clients.Others.removeAccount(id);
                 _logger.Log($"{id} was signed out.");
